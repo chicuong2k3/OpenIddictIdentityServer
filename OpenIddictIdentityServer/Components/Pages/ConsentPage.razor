@@ -1,0 +1,154 @@
+﻿@page "/consent"
+@using OpenIddict.Abstractions
+@using System.Web
+
+@inject NavigationManager NavigationManager
+@inject IOpenIddictApplicationManager ApplicationManager
+@inject IOpenIddictScopeManager ScopeManager
+
+<RadzenCard Style="max-width: 400px; margin: auto; padding: 20px;">
+    <RadzenStack AlignItems="AlignItems.Center" Gap="20px">
+        <RadzenHeading Size="H1" Text="Consent Required" />
+
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat">
+                @errorMessage
+            </RadzenAlert>
+        }
+
+        @if (client != null)
+        {
+            <RadzenStack>
+                <p>
+                    <strong>@client.DisplayName</strong> is requesting access to your data.
+                </p>
+                <RadzenStack>
+                    <RadzenHeading Size="H4" Text="Requested Permissions:" />
+                    @foreach (var scope in requestedScopes)
+                    {
+                        <RadzenCheckBox Value="true" Disabled="true" Name="@scope">
+                            @GetScopeDescription(scope)
+                        </RadzenCheckBox>
+                    }
+                </RadzenStack>
+                <p>Do you want to grant these permissions?</p>
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
+                    <RadzenButton Text="Accept"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Variant="Variant.Flat"
+                                  Click="@(() => HandleConsentAsync(true))"
+                                  Disabled="@isLoading" />
+                    <RadzenButton Text="Deny"
+                                  ButtonStyle="ButtonStyle.Secondary"
+                                  Variant="Variant.Flat"
+                                  Click="@(() => HandleConsentAsync(false))"
+                                  Disabled="@isLoading" />
+                </RadzenStack>
+            </RadzenStack>
+        }
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    private Dictionary<string, string> queryParams = new();
+    private OpenIddictApplicationDescriptor? client;
+    private List<string> requestedScopes = new();
+    private bool isLoading;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var uri = new Uri(NavigationManager.Uri);
+            var query = HttpUtility.ParseQueryString(uri.Query);
+            queryParams = query.AllKeys.ToDictionary(k => k!, k => query[k]!);
+
+            var clientId = queryParams.GetValueOrDefault("client_id");
+            var scope = queryParams.GetValueOrDefault("scope");
+
+            if (string.IsNullOrWhiteSpace(clientId))
+            {
+                errorMessage = "Invalid client request.";
+                return;
+            }
+
+            var clientApp = await ApplicationManager.FindByClientIdAsync(clientId);
+            if (clientApp == null)
+            {
+                errorMessage = "Unknown client application.";
+                return;
+            }
+
+            client = new OpenIddictApplicationDescriptor();
+            await ApplicationManager.PopulateAsync(client, clientApp);
+
+            if (!string.IsNullOrWhiteSpace(scope))
+            {
+                var scopesFromQuery = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                var allowedScopes = new List<string>();
+                await foreach (var scopeEntity in ScopeManager.ListAsync())
+                {
+                    var scopeName = await ScopeManager.GetNameAsync(scopeEntity) ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(scopeName))
+                    {
+                        allowedScopes.Add(scopeName);
+                    }
+                }
+                requestedScopes = scopesFromQuery.Intersect(allowedScopes, StringComparer.OrdinalIgnoreCase).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred during initialization. Please try again later.";
+            Console.WriteLine(ex);
+        }
+    }
+
+    private void HandleConsentAsync(bool grant)
+    {
+        try
+        {
+            isLoading = true;
+            if (grant)
+            {
+                queryParams["consent_result"] = "accepted";
+                var authorizeUrl = $"/connect/authorize{QueryString.Create(queryParams.Select(kv => new KeyValuePair<string, string>(kv.Key, kv.Value)))}";
+                NavigationManager.NavigateTo(authorizeUrl, true);
+            }
+            else
+            {
+                var redirectUri = queryParams.GetValueOrDefault("redirect_uri") ?? string.Empty;
+                var state = queryParams.GetValueOrDefault("state");
+                var redirectUrl = $"{redirectUri}?error={OpenIddictConstants.Errors.AccessDenied}&error_description=The%20user%20denied%20the%20request";
+                if (!string.IsNullOrWhiteSpace(state))
+                {
+                    redirectUrl += $"&state={state}";
+                }
+                NavigationManager.NavigateTo(redirectUrl, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Consent processing failed. Please try again.";
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string GetScopeDescription(string scope)
+    {
+        return scope switch
+        {
+            OpenIddictConstants.Scopes.OpenId => "Verify your identity",
+            OpenIddictConstants.Scopes.Email => "Access your email address",
+            OpenIddictConstants.Scopes.Profile => "Access your profile information",
+            "api" => "Access the API on your behalf",
+            _ => scope
+        };
+    }
+}

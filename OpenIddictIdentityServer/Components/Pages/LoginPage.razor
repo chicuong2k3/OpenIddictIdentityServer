@@ -1,0 +1,83 @@
+﻿@page "/login"
+@using Microsoft.AspNetCore.Components.Authorization
+@using OpenIddictIdentityServer.Models
+
+@attribute [AllowAnonymous]
+
+@inject IJSRuntime JSRuntime
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #f7f7f7;">
+    <RadzenCard Style="width: 400px">
+        <RadzenStack AlignItems="AlignItems.Center">
+            <RadzenHeading Size="H1" Text="Login" />
+        </RadzenStack>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" Text="@errorMessage" />
+        }
+
+        <RadzenTemplateForm Data="@loginModel" TItem="LoginModel" Submit="@HandleLogin">
+
+            <RadzenStack>
+                <RadzenFormField Text="Email" AllowFloatingLabel="false">
+                    <ChildContent>
+                        <RadzenTextBox @bind-Value="loginModel.Email" Name="Email" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="Email" Text="Email is required" />
+                        <RadzenEmailValidator Component="Email" Text="Invalid email format" />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="Password" AllowFloatingLabel="false">
+                    <ChildContent>
+                        <RadzenPassword @bind-Value="loginModel.Password" Name="Password" />
+                    </ChildContent>
+                    <Helper>
+                        <RadzenRequiredValidator Component="Password" Text="Password is required" />
+                        <RadzenRegexValidator Component="Password"
+                                              Text="Invalid password! It must have at least 8 characters, including 1 lowercase (a-z), 1 uppercase (A-Z), 1 number (0-9), and 1 special character"
+                                              Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$" />
+                    </Helper>
+                </RadzenFormField>
+
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                    <RadzenCheckBox @bind-Value="loginModel.RememberMe" />
+                    <RadzenLabel>Remember Me</RadzenLabel>
+                </RadzenStack>
+                <RadzenButton ButtonType="ButtonType.Submit" Variant="Variant.Flat" Text="Login" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
+            </RadzenStack>
+
+
+        </RadzenTemplateForm>
+    </RadzenCard>
+</div>
+
+
+@code {
+    private LoginModel loginModel = new();
+    private bool isLoading;
+    private string errorMessage = string.Empty;
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    private async Task HandleLogin(LoginModel model)
+    {
+        isLoading = true;
+        var response = await JSRuntime.InvokeAsync<LoginResponse>("login", model.Email, model.Password, model.RememberMe);
+
+        isLoading = false;
+
+        if (response.IsSuccess)
+        {
+            NavigationManager.NavigateTo(ReturnUrl ?? "/", true);
+        }
+        else
+        {
+            errorMessage = response.ErrorMessage ?? "";
+        }
+    }
+}
