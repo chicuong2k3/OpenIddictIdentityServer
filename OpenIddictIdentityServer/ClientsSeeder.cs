@@ -59,11 +59,11 @@ public class ClientsSeeder
                 ConsentType = ConsentTypes.Explicit,
                 RedirectUris =
                 {
-                    new Uri("https://localhost:7070/signin-oidc")
+                    new Uri("https://localhost:9090/signin-oidc")
                 },
                 PostLogoutRedirectUris =
                 {
-                    new Uri("https://localhost:7070/signout-callback-oidc")
+                    new Uri("https://localhost:9090/signout-callback-oidc")
                 },
                 Permissions =
                 {

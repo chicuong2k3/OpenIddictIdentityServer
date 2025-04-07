@@ -16,6 +16,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace OpenIddictBlazor.Controllers;
 
+[ApiController]
 public class AuthorizationController : Controller
 {
     private readonly IOpenIddictApplicationManager _applicationManager;
@@ -72,8 +73,19 @@ public class AuthorizationController : Controller
 
         var userId = result.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
-        var user = await _userManager.FindByIdAsync(userId) ??
-                    throw new InvalidOperationException("The user cannot be found.");
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return Forbid(
+                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                properties: new AuthenticationProperties(new Dictionary<string, string?>
+                {
+                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                        "Cannot find user from the token."
+                }));
+        }
 
 
         // get all requested scopes
@@ -124,7 +136,7 @@ public class AuthorizationController : Controller
             {
                 _cache.Set(cacheKey, string.Join(" ", newScopes), TimeSpan.FromMinutes(5));
                 var parameters = _authService.ParseParameters(HttpContext, new List<string> { "scope" });
-                parameters["scope"] = string.Join(" ", newScopes);
+                parameters["scope"] = string.Join(" ", requestedScopes);
                 parameters["state"] = state;
                 var consentUrl = $"/consent{QueryString.Create(parameters)}";
                 return Redirect(consentUrl);
@@ -163,7 +175,7 @@ public class AuthorizationController : Controller
                 subject: userId,
                 client: await _applicationManager.GetClientIdAsync(application) ?? string.Empty,
                 type: AuthorizationTypes.Permanent,
-                scopes: newScopes.ToImmutableArray()
+                scopes: requestedScopes.ToImmutableArray()
             );
         }
 
@@ -188,7 +200,9 @@ public class AuthorizationController : Controller
 
         var userId = result.Principal?.GetClaim(Claims.Subject);
 
-        if (string.IsNullOrEmpty(userId))
+        var user = await _userManager.FindByIdAsync(userId ?? string.Empty);
+
+        if (user == null)
         {
             return Forbid(
                 authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
@@ -206,9 +220,11 @@ public class AuthorizationController : Controller
             roleType: Claims.Role);
 
         identity.SetClaim(Claims.Subject, userId)
-            .SetClaim(Claims.Email, userId)
-            .SetClaim(Claims.Name, userId)
-            .SetClaims(Claims.Role, ["user", "admin"]);
+            .SetClaim(Claims.Email, user.Email)
+            .SetClaim(Claims.Name, result.Principal?.FindFirst(ClaimTypes.Name)?.Value ?? userId)
+            .SetClaims(Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray())
+            .SetScopes(request.GetScopes())
+            .SetResources(await _scopeManager.ListResourcesAsync(request.GetScopes()).ToListAsync());
 
         identity.SetDestinations(AuthService.GetDestinations);
 
