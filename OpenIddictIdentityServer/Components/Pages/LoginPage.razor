@@ -8,7 +8,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
-<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #f7f7f7;">
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100vh">
     <RadzenCard Style="width: 400px">
         <RadzenStack AlignItems="AlignItems.Center">
             <RadzenHeading Size="H1" Text="Login" />
@@ -43,17 +43,31 @@
                     </Helper>
                 </RadzenFormField>
 
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                    <RadzenCheckBox @bind-Value="loginModel.RememberMe" />
-                    <RadzenLabel>Remember Me</RadzenLabel>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8">
+                        <RadzenCheckBox @bind-Value="loginModel.RememberMe" Name="RememberMe" />
+                        <RadzenLabel Component="RememberMe">Remember Me</RadzenLabel>
+                    </RadzenStack>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                        <RadzenLink Path="/forgot-password" Text="Forgot Password?" />
+                    </RadzenStack>
                 </RadzenStack>
                 <RadzenButton ButtonType="ButtonType.Submit" Variant="Variant.Flat" Text="Login" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
+
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="4">
+                    Don't have an account?
+                    <RadzenLink Path="/register" Text="Register" />
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Horizontal">
+
+                </RadzenStack>
             </RadzenStack>
 
 
         </RadzenTemplateForm>
     </RadzenCard>
-</div>
+</RadzenStack>
 
 
 @code {

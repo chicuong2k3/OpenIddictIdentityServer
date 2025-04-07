@@ -2,7 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
 
-<div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #f7f7f7;">
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100vh">
     <RadzenCard Style="width: 400px">
         <RadzenStack AlignItems="AlignItems.Center">
             <RadzenHeading Size="H1" Text="Register" />
@@ -37,12 +37,17 @@
                     </Helper>
                 </RadzenFormField>
                 <RadzenButton ButtonType="ButtonType.Submit" Variant="Variant.Flat" Text="Register" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
+
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="4">
+                    Already have an account?
+                    <RadzenLink Path="/login" Text="Login" />
+                </RadzenStack>
             </RadzenStack>
 
 
         </RadzenTemplateForm>
     </RadzenCard>
-</div>
+</RadzenStack>
 
 @code {
     private RegisterUserModel registerUserModel = new RegisterUserModel();
