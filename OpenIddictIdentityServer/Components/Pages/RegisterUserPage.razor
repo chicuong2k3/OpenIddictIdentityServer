@@ -1,62 +1,92 @@
 ﻿@page "/register"
+@attribute [AllowAnonymous]
+
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
 
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100vh">
-    <RadzenCard Style="width: 400px">
-        <RadzenStack AlignItems="AlignItems.Center">
-            <RadzenHeading Size="H1" Text="Register" />
-        </RadzenStack>
+<div class="flex flex-row justify-center">
+    <Card Width="420px">
+        <CardHeader>
+            <div class="flex flex-col justify-center items-center text-center gap-2">
+                <Avatar Name="A" />
+                <h3 class="-mt-4 text-xl">Create Account</h3>
+                <small class="-mt-4 text-sm text-muted-foreground">Sign up to get started</small>
+            </div>
+        </CardHeader>
+        <CardContent>
+            <EditForm Model="registerUserModel" OnValidSubmit="HandleRegistration">
+                <DataAnnotationsValidator />
+                <div class="flex flex-col">
+                    <div class="w-full">
+                        <Input TItem="string"
+                               Label="Email"
+                               Type="text"
+                               Placeholder="name@example.com"
+                               @bind-Value="registerUserModel.Email" />
+                        <ValidationMessage For="@(() => registerUserModel.Email)" class="text-xs text-red-500 mt-2" />
+                    </div>
 
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <RadzenAlert AlertStyle="AlertStyle.Danger" Text="@errorMessage" />
-        }
+                    <div class="w-full">
+                        <Input TItem="string"
+                               Label="Password"
+                               Type="password"
+                               Placeholder="••••••••••"
+                               @bind-Value="registerUserModel.Password" />
+                        <ValidationMessage For="@(() => registerUserModel.Password)" class="text-xs text-red-500 mt-2" />
+                    </div>
 
-        <RadzenTemplateForm Data="@registerUserModel" TItem="RegisterUserModel" Submit="@HandleRegistration">
+                    <Button Action="ButtonAction.Submit"
+                            Type="@(isLoading ? ButtonType.Loading : ButtonType.Primary)"
+                            Class="flex justify-center"
+                            Width="100%"
+                            Text="Sign up"
+                            Disabled="isLoading" />
+                </div>
+            </EditForm>
 
-            <RadzenStack>
-                <RadzenFormField Text="Email" AllowFloatingLabel="false">
-                    <ChildContent>
-                        <RadzenTextBox @bind-Value="registerUserModel.Email" Name="Email" />
-                    </ChildContent>
-                    <Helper>
-                        <RadzenRequiredValidator Component="Email" Text="Email is required" />
-                        <RadzenEmailValidator Component="Email" Text="Invalid email format" />
-                    </Helper>
-                </RadzenFormField>
-                <RadzenFormField Text="Password" AllowFloatingLabel="false">
-                    <ChildContent>
-                        <RadzenPassword @bind-Value="registerUserModel.Password" Name="Password" />
-                    </ChildContent>
-                    <Helper>
-                        <RadzenRequiredValidator Component="Password" Text="Password is required" />
-                        <RadzenRegexValidator Component="Password"
-                                              Text="Invalid password! It must have at least 8 characters, including 1 lowercase (a-z), 1 uppercase (A-Z), 1 number (0-9), and 1 special character"
-                                              Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$" />
-                    </Helper>
-                </RadzenFormField>
-                <RadzenButton ButtonType="ButtonType.Submit" Variant="Variant.Flat" Text="Register" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
+            <div class="continue-with relative w-full text-center text-xs mt-4">
+                <span class="muted-color block z-10">OR CONTINUE WITH</span>
+            </div>
 
-                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="4">
+            <div class="w-full flex justify-between gap-4">
+                <div class="w-1/2">
+                    <Button Type="ButtonType.Outline"
+                            Class="w-full flex items-center justify-center"
+                            Width="100%"
+                            OnClick="HandleGitHubLogin">
+                        GitHub
+                    </Button>
+                </div>
+                <div class="w-1/2">
+                    <Button Type="ButtonType.Outline"
+                            Class="w-full flex items-center justify-center"
+                            Width="100%"
+                            OnClick="HandleGoogleLogin">
+                        Google
+                    </Button>
+                </div>
+            </div>
+        </CardContent>
+        <CardFooter>
+            <div class="w-full flex flex-col items-center p-4 pt-0">
+                <small class="block ta-center muted-color">
                     Already have an account?
-                    <RadzenLink Path="/login" Text="Login" />
-                </RadzenStack>
-            </RadzenStack>
-
-
-        </RadzenTemplateForm>
-    </RadzenCard>
-</RadzenStack>
+                    <a href="/login" class="no-underline hover:underline text-[var(--primary-fg)]">Sign in</a>
+                </small>
+            </div>
+        </CardFooter>
+    </Card>
+</div>
 
 @code {
-    private RegisterUserModel registerUserModel = new RegisterUserModel();
+    private RegisterUserModel registerUserModel = new();
     private string errorMessage = string.Empty;
     private bool isLoading = false;
 
     private async Task HandleRegistration()
     {
         isLoading = true;
+        errorMessage = string.Empty;
 
         var user = new ApplicationUser
             {
@@ -71,7 +101,8 @@
         }
 
         isLoading = false;
-
-        NavigationManager.NavigateTo("/login");
     }
+
+    private void HandleGitHubLogin() { }
+    private void HandleGoogleLogin() { }
 }

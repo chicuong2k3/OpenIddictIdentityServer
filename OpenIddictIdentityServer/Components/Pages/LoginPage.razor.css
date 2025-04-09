@@ -1,0 +1,14 @@
+﻿.continue-with::before,
+.continue-with::after {
+    position: absolute;
+    content: "";
+    left: 0;
+    width: 32%;
+    border-top: 1px solid var(--primary-border);
+    top: 0.5rem;
+}
+
+.continue-with::after {
+    left: unset;
+    right: 0;
+}

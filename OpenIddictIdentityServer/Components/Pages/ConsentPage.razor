@@ -6,49 +6,59 @@
 @inject IOpenIddictApplicationManager ApplicationManager
 @inject IOpenIddictScopeManager ScopeManager
 
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100vh">
-    <RadzenCard Style="max-width: 400px">
-        <RadzenHeading Size="H1" Text="Website Name" />
-        <RadzenHeading Size="H3" Text="Permissions requested    " />
-        @if (!string.IsNullOrWhiteSpace(errorMessage))
-        {
-            <RadzenAlert AlertStyle="AlertStyle.Danger" Variant="Variant.Flat">
-                @errorMessage
-            </RadzenAlert>
-        }
+<div class="flex flex-row justify-center mt-16">
+    <Card Width="420px">
+        <CardHeader>
+            <div class="flex flex-col items-center text-center gap-2">
+                <Avatar Name="A" />
+                <h3 class="-mt-4 text-xl">Website Name</h3>
+            </div>
+        </CardHeader>
+        <CardContent>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <Alert Type="AlertType.Destructive" Class="mb-4">
+                    <span>@errorMessage</span>
+                </Alert>
+            }
 
-        @if (client != null)
-        {
-            <RadzenStack>
-                @client.DisplayName is requesting access to your data.
-                <RadzenStack Gap="0">
-                    @foreach (var scope in requestedScopes)
-                    {
-                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8">
-                            <RadzenCheckBox Disabled="true" Value="true" />
-                            @GetScopeDescription(scope)
-                        </RadzenStack>
-                    }
+            @if (client != null)
+            {
+                <div class="space-y-4">
+                    <div class="text-center">
+                        <small class="-mt-4 text-base font-bold">@client.DisplayName is requesting access to your data.</small>
+                    </div>
+                    <p class="text-sm text-muted-foreground">
+                        Accepting these permissions means that you allow this app to use your data as specified in their terms of services and privacy statement.
+                    </p>
 
-                </RadzenStack>
-                Accepting these permissions means that you allow this app to use your data as specified in their terms of services and privacy statement.
-                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center">
-                    <RadzenButton Text="Deny"
-                                  ButtonStyle="ButtonStyle.Secondary"
-                                  Variant="Variant.Flat"
-                                  Click="@(() => HandleConsentAsync(false))"
-                                  Disabled="@isLoading" />
-                    <RadzenButton Text="Accept"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Variant="Variant.Flat"
-                                  Click="@(() => HandleConsentAsync(true))"
-                                  Disabled="@isLoading" />
+                    <div class="space-y-2">
+                        @foreach (var scope in requestedScopes)
+                        {
+                            <div class="flex items-center gap-2">
+                                @* <Icon Type="IconType.Lucide" Name="badge-check" Color="#22d360" /> *@
+                                <span class="text-sm font-bold">@GetScopeDescription(scope)</span>
+                            </div>
+                        }
+                    </div>
 
-                </RadzenStack>
-            </RadzenStack>
-        }
-    </RadzenCard>
-</RadzenStack>
+                    <div class="flex justify-center gap-4">
+                        <Button Type="ButtonType.Secondary"
+                                OnClick="@(() => HandleConsentAsync(false))"
+                                Disabled="isLoading">
+                            Deny
+                        </Button>
+                        <Button Type="ButtonType.Primary"
+                                OnClick="@(() => HandleConsentAsync(true))"
+                                Disabled="isLoading">
+                            Accept
+                        </Button>
+                    </div>
+                </div>
+            }
+        </CardContent>
+    </Card>
+</div>
 
 @code {
     private Dictionary<string, string> queryParams = new();

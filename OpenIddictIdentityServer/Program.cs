@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using OpenIddictIdentityServer;
 using OpenIddictIdentityServer.Components;
 using OpenIddictIdentityServer.Persistence;
-using Radzen;
+using Sysinfocus.AspNetCore.Components;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,10 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSysinfocus(false);
+
 builder.Services.AddMemoryCache();
-
-builder.Services.AddRadzenComponents();
-
 builder.Services.AddControllers();
 
 

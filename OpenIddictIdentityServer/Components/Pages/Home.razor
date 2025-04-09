@@ -5,21 +5,20 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<Card>
 
-Welcome to your new app.
-
-
-
-<AuthorizeView>
-    <Authorized>
-        <p>You are logged in!</p>
-        <RadzenButton ButtonType="ButtonType.Button" Text="Logout" Click="HandleLogout" />
-    </Authorized>
-    <NotAuthorized>
-        <p>You are not logged in.</p>
-    </NotAuthorized>
-</AuthorizeView>
+    <CardContent>
+        <AuthorizeView>
+            <Authorized>
+                <p>You are logged in!</p>
+                <Button Text="Logout" OnClick="HandleLogout" />
+            </Authorized>
+            <NotAuthorized>
+                <p>You are not logged in.</p>
+            </NotAuthorized>
+        </AuthorizeView>
+    </CardContent>
+</Card>
 
 @code {
     private async void HandleLogout()

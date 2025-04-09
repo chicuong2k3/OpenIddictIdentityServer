@@ -24,9 +24,9 @@ public class AuthenticationController : ControllerBase
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
 
-        if (user == null)
+        if (user == null || await _userManager.CheckPasswordAsync(user, model.Password))
         {
-            return BadRequest("Email or password is incorrect");
+            return BadRequest("Email or password is incorrect.");
         }
 
         var roles = await _userManager.GetRolesAsync(user);

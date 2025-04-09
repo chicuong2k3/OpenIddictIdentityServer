@@ -1,73 +1,91 @@
 ﻿@page "/login"
-@using Microsoft.AspNetCore.Components.Authorization
-@using OpenIddictIdentityServer.Models
 
 @attribute [AllowAnonymous]
 
 @inject IJSRuntime JSRuntime
-@inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="height: 100vh">
-    <RadzenCard Style="width: 400px">
-        <RadzenStack AlignItems="AlignItems.Center">
-            <RadzenHeading Size="H1" Text="Login" />
-        </RadzenStack>
+﻿<div class="flex flex-row justify-center">
+    <Card Width="420px">
+        <CardHeader>
+            <div class="flex flex-col justify-center items-center text-center gap-2">
+                <Avatar Name="A" />
+                <h3 class="-mt-4 text-xl">Welcome back</h3>
+                <small class="-mt-4 text-sm text-muted-foreground">Sign in to your account to continue</small>
+            </div>
+        </CardHeader>
+        <CardContent>
+            <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+                <DataAnnotationsValidator />
+                <div class="flex flex-col">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <Alert Icon="" Title=""
+                               Description="@errorMessage"
+                               Type="AlertType.Destructive" />
+                    }
 
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <RadzenAlert AlertStyle="AlertStyle.Danger" Text="@errorMessage" />
-        }
+                    <div class="w-full">
+                        <Input TItem="string" Label="Email" Type="text"
+                               Placeholder="name@example.com"
+                               @bind-Value="loginModel.Email" />
+                        <ValidationMessage For="@(() => loginModel.Email)" class="text-xs text-red-500 mt-2" />
+                    </div>
+                    <div class="w-full">
+                        <Input TItem="string" Label="Password"
+                               Type="password"
+                               Placeholder="••••••••••"
+                               @bind-Value="loginModel.Password" />
+                        <ValidationMessage For="@(() => loginModel.Password)" class="text-xs text-red-500 mt-2" />
+                    </div>
 
-        <RadzenTemplateForm Data="@loginModel" TItem="LoginModel" Submit="@HandleLogin">
+                    <div class="flex flex-row justify-between items-center w-full">
+                        <div>
+                            <Checkbox Label="Remember me" Checked="loginModel.RememberMe" OnClick="@(() => loginModel.RememberMe = !loginModel.RememberMe)" />
+                        </div>
+                        <a class="block no-underline hover:underline text-sm font-normal" href="#">Forgot password?</a>
+                    </div>
 
-            <RadzenStack>
-                <RadzenFormField Text="Email" AllowFloatingLabel="false">
-                    <ChildContent>
-                        <RadzenTextBox @bind-Value="loginModel.Email" Name="Email" />
-                    </ChildContent>
-                    <Helper>
-                        <RadzenRequiredValidator Component="Email" Text="Email is required" />
-                        <RadzenEmailValidator Component="Email" Text="Invalid email format" />
-                    </Helper>
-                </RadzenFormField>
-                <RadzenFormField Text="Password" AllowFloatingLabel="false">
-                    <ChildContent>
-                        <RadzenPassword @bind-Value="loginModel.Password" Name="Password" />
-                    </ChildContent>
-                    <Helper>
-                        <RadzenRequiredValidator Component="Password" Text="Password is required" />
-                        <RadzenRegexValidator Component="Password"
-                                              Text="Invalid password! It must have at least 8 characters, including 1 lowercase (a-z), 1 uppercase (A-Z), 1 number (0-9), and 1 special character"
-                                              Pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$" />
-                    </Helper>
-                </RadzenFormField>
+                    <Button Action="ButtonAction.Submit"
+                            Type="@(isLoading ? ButtonType.Loading : ButtonType.Primary)"
+                            Disabled="isLoading"
+                            Text="Sign in"
+                            Class="flex justify-center"
+                            Width="100%" />
 
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween">
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="8">
-                        <RadzenCheckBox @bind-Value="loginModel.RememberMe" Name="RememberMe" />
-                        <RadzenLabel Component="RememberMe">Remember Me</RadzenLabel>
-                    </RadzenStack>
-                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                        <RadzenLink Path="/forgot-password" Text="Forgot Password?" />
-                    </RadzenStack>
-                </RadzenStack>
-                <RadzenButton ButtonType="ButtonType.Submit" Variant="Variant.Flat" Text="Login" ButtonStyle="ButtonStyle.Primary" Disabled="@isLoading" />
+                </div>
+            </EditForm>
 
-                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" AlignItems="AlignItems.Center" Gap="4">
-                    Don't have an account?
-                    <RadzenLink Path="/register" Text="Register" />
-                </RadzenStack>
+            <div class="continue-with relative w-full text-center text-xs">
+                <span class="muted-color block z-10">OR CONTINUE WITH</span>
+            </div>
+            <div class="w-full flex justify-between gap-4">
+                <div class="w-1/2">
+                    <Button Type="ButtonType.Outline"
+                            Class="flex flex-col items-center justify-center"
+                            Width="100%"
+                            OnClick="HandleGitHubLogin">
+                        GitHub
+                    </Button>
+                </div>
+                <div class="w-1/2">
+                    <Button Type="ButtonType.Outline"
+                            Class="flex flex-col items-center justify-center"
+                            Width="100%"
+                            OnClick="HandleGoogleLogin">
+                        Google
+                    </Button>
+                </div>
+            </div>
 
-                <RadzenStack Orientation="Orientation.Horizontal">
-
-                </RadzenStack>
-            </RadzenStack>
-
-
-        </RadzenTemplateForm>
-    </RadzenCard>
-</RadzenStack>
+        </CardContent>
+        <CardFooter>
+            <div class="w-full flex flex-row justify-center p-4 pt-0">
+                <small class="block ta-center muted-color">Don't have an account? <a href="/register" class="no-underline hover:underline text-[var(--primary-fg)]">Sign up</a></small>
+            </div>
+        </CardFooter>
+    </Card>
+</div>
 
 
 @code {
@@ -78,10 +96,10 @@
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
-    private async Task HandleLogin(LoginModel model)
+    private async Task HandleLogin()
     {
         isLoading = true;
-        var response = await JSRuntime.InvokeAsync<LoginResponse>("login", model.Email, model.Password, model.RememberMe);
+        var response = await JSRuntime.InvokeAsync<LoginResponse>("login", loginModel.Email, loginModel.Password, loginModel.RememberMe);
 
         isLoading = false;
 
@@ -91,7 +109,10 @@
         }
         else
         {
-            errorMessage = response.ErrorMessage ?? "";
+            errorMessage = response.ErrorMessage ?? "Login failed";
         }
     }
+
+    private void HandleGitHubLogin() { }
+    private void HandleGoogleLogin() { }
 }
