@@ -1,5 +1,5 @@
 ﻿window.login = async (email, password, rememberMe) => {
-    const response = await fetch('/api/auth/login', {
+    const response = await fetch('/api/account/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -25,7 +25,7 @@
 };
 
 window.logout = async () => {
-    const response = await fetch('/api/auth/logout', {
+    const response = await fetch('/api/account/logout', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -37,28 +37,4 @@ window.logout = async () => {
     }
 
     return true;
-};
-
-window.consent = async (grant) => {
-    const response = await fetch('/api/consent/grant', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: {
-            'grant': grant,
-        }
-    });
-
-    if (!response.ok) {
-        return {
-            isSuccess: false,
-            errorMessage: await response.text()
-        };
-    }
-
-    return {
-        isSuccess: true,
-        errorMessage: null
-    };
 };

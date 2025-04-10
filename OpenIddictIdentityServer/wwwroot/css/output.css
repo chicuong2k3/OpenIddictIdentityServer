@@ -7,8 +7,15 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-300: oklch(80.8% 0.114 19.571);
+    --color-red-400: oklch(70.4% 0.191 22.216);
     --color-red-500: oklch(63.7% 0.237 25.331);
+    --color-red-700: oklch(50.5% 0.213 27.518);
     --color-green-500: oklch(72.3% 0.219 149.579);
+    --color-sky-300: oklch(82.8% 0.111 230.318);
+    --color-sky-500: oklch(68.5% 0.169 237.323);
+    --color-sky-700: oklch(50% 0.134 242.749);
+    --color-blue-500: oklch(62.3% 0.214 259.815);
     --spacing: 0.25rem;
     --text-xs: 0.75rem;
     --text-xs--line-height: calc(1 / 0.75);
@@ -172,59 +179,23 @@
   }
 }
 @layer utilities {
-  .absolute {
-    position: absolute;
-  }
   .relative {
     position: relative;
   }
   .static {
     position: static;
   }
-  .top-2 {
-    top: calc(var(--spacing) * 2);
-  }
-  .right-0 {
-    right: calc(var(--spacing) * 0);
-  }
   .z-10 {
     z-index: 10;
   }
-  .m-0 {
-    margin: calc(var(--spacing) * 0);
-  }
-  .-mt-1 {
-    margin-top: calc(var(--spacing) * -1);
-  }
-  .-mt-2 {
-    margin-top: calc(var(--spacing) * -2);
-  }
-  .-mt-3 {
-    margin-top: calc(var(--spacing) * -3);
-  }
   .-mt-4 {
     margin-top: calc(var(--spacing) * -4);
-  }
-  .-mt-10 {
-    margin-top: calc(var(--spacing) * -10);
-  }
-  .-mt-12 {
-    margin-top: calc(var(--spacing) * -12);
-  }
-  .mt-0 {
-    margin-top: calc(var(--spacing) * 0);
-  }
-  .mt-1 {
-    margin-top: calc(var(--spacing) * 1);
   }
   .mt-2 {
     margin-top: calc(var(--spacing) * 2);
   }
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
-  }
-  .mt-12 {
-    margin-top: calc(var(--spacing) * 12);
   }
   .mt-16 {
     margin-top: calc(var(--spacing) * 16);
@@ -238,29 +209,11 @@
   .flex {
     display: flex;
   }
-  .inline {
-    display: inline;
-  }
   .table {
     display: table;
   }
-  .h-16 {
-    height: calc(var(--spacing) * 16);
-  }
-  .h-screen {
-    height: 100vh;
-  }
   .w-1\/2 {
     width: calc(1/2 * 100%);
-  }
-  .w-1\/3 {
-    width: calc(1/3 * 100%);
-  }
-  .w-12 {
-    width: calc(var(--spacing) * 12);
-  }
-  .w-16 {
-    width: calc(var(--spacing) * 16);
   }
   .w-full {
     width: 100%;
@@ -280,27 +233,11 @@
   .justify-center {
     justify-content: center;
   }
-  .justify-end {
-    justify-content: flex-end;
-  }
-  .gap-0 {
-    gap: calc(var(--spacing) * 0);
-  }
-  .gap-1 {
-    gap: calc(var(--spacing) * 1);
-  }
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
   .gap-4 {
     gap: calc(var(--spacing) * 4);
-  }
-  .space-y-0 {
-    :where(& > :not(:last-child)) {
-      --tw-space-y-reverse: 0;
-      margin-block-start: calc(calc(var(--spacing) * 0) * var(--tw-space-y-reverse));
-      margin-block-end: calc(calc(var(--spacing) * 0) * calc(1 - var(--tw-space-y-reverse)));
-    }
   }
   .space-y-2 {
     :where(& > :not(:last-child)) {
@@ -316,21 +253,17 @@
       margin-block-end: calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
-  .border-t {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 1px;
+  .bg-red-400 {
+    background-color: var(--color-red-400);
   }
-  .p-0 {
-    padding: calc(var(--spacing) * 0);
+  .bg-red-500 {
+    background-color: var(--color-red-500);
   }
-  .p-2 {
-    padding: calc(var(--spacing) * 2);
+  .bg-sky-500 {
+    background-color: var(--color-sky-500);
   }
   .p-4 {
     padding: calc(var(--spacing) * 4);
-  }
-  .pe-10 {
-    padding-inline-end: calc(var(--spacing) * 10);
   }
   .pt-0 {
     padding-top: calc(var(--spacing) * 0);
@@ -341,10 +274,6 @@
   .text-base {
     font-size: var(--text-base);
     line-height: var(--tw-leading, var(--text-base--line-height));
-  }
-  .text-lg {
-    font-size: var(--text-lg);
-    line-height: var(--tw-leading, var(--text-lg--line-height));
   }
   .text-sm {
     font-size: var(--text-sm);
@@ -369,17 +298,11 @@
   .text-\[var\(--primary-fg\)\] {
     color: var(--primary-fg);
   }
-  .text-green-500 {
-    color: var(--color-green-500);
-  }
   .text-red-500 {
     color: var(--color-red-500);
   }
-  .lowercase {
-    text-transform: lowercase;
-  }
-  .uppercase {
-    text-transform: uppercase;
+  .text-sky-500 {
+    color: var(--color-sky-500);
   }
   .no-underline {
     text-decoration-line: none;
@@ -427,11 +350,6 @@ h1:focus {
   inherits: false;
   initial-value: 0;
 }
-@property --tw-border-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
 @property --tw-font-weight {
   syntax: "*";
   inherits: false;
@@ -440,7 +358,6 @@ h1:focus {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
       --tw-space-y-reverse: 0;
-      --tw-border-style: solid;
       --tw-font-weight: initial;
     }
   }

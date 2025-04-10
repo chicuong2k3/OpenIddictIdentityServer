@@ -61,18 +61,18 @@
             </div>
             <div class="w-full flex justify-between gap-4">
                 <div class="w-1/2">
-                    <Button Type="ButtonType.Outline"
-                            Class="flex flex-col items-center justify-center"
-                            Width="100%"
-                            OnClick="HandleGitHubLogin">
-                        GitHub
+                    <Button Class="flex flex-col items-center justify-center"
+                            Type="ButtonType.Outline"
+                            Width="100%" Style="background-color: var(--color-sky-700); color: #fff"
+                            OnClick="@(() => NavigationManager.NavigateTo($"/ExternalLogin?provider=Facebook&returnUrl={ReturnUrl}", true))">
+                        Facebook
                     </Button>
                 </div>
                 <div class="w-1/2">
                     <Button Type="ButtonType.Outline"
                             Class="flex flex-col items-center justify-center"
-                            Width="100%"
-                            OnClick="HandleGoogleLogin">
+                            Width="100%" Style="background-color: var(--color-red-700); color: #fff"
+                            OnClick="@(() => NavigationManager.NavigateTo($"/ExternalLogin?provider=Google&returnUrl={ReturnUrl}", true))">
                         Google
                     </Button>
                 </div>
@@ -113,6 +113,4 @@
         }
     }
 
-    private void HandleGitHubLogin() { }
-    private void HandleGoogleLogin() { }
 }

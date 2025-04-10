@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject NavigationManager NavigationManager
 
@@ -9,7 +10,14 @@
 Welcome to your new app.
 
 
-<button @onclick="Login">Đăng nhập</button>
+<AuthorizeView>
+    <Authorized>
+        You are logged in.
+    </Authorized>
+    <NotAuthorized>
+        <button @onclick="Login">Đăng nhập</button>
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     private void Login()

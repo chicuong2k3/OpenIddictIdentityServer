@@ -6,20 +6,23 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using OpenIddictIdentityServer.Persistence;
+using OpenIddictIdentityServer.Controllers.Dtos;
+using OpenIddictIdentityServer.Controllers.Requests;
 
 namespace OpenIddictIdentityServer.Controllers;
 
 [ApiController]
-public class AuthenticationController : ControllerBase
+[Route("api/[controller]")]
+public class AccountController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public AuthenticationController(UserManager<ApplicationUser> userManager)
+    public AccountController(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
     }
 
-    [HttpPost("/api/auth/login")]
+    [HttpPost("login")]
     public async Task<IActionResult> Login([FromForm] LoginModel model)
     {
         var user = await _userManager.FindByEmailAsync(model.Email);
@@ -55,28 +58,51 @@ public class AuthenticationController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("/api/auth/logout")]
+    [HttpPost("logout")]
     public async Task<ActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Ok();
     }
 
+    [HttpGet("user")]
     [Authorize]
-    [HttpPost("/api/consent/grant")]
-    public async Task<IActionResult> GrantConsent([FromForm] string grant)
+    public async Task<IActionResult> GetUser()
     {
-        var user = HttpContext.User;
-        var claims = new List<Claim>(user.Claims)
-        {
-            new Claim("Consent", grant)
-        };
-        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var newPrincipal = new ClaimsPrincipal(claimsIdentity);
+        var user = await _userManager.GetUserAsync(User);
 
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, newPrincipal);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        return Ok(new UserDto
+        {
+            Id = user.Id,
+            Email = user.Email,
+            UserName = user.UserName,
+            PhoneNumber = user.PhoneNumber,
+            Roles = await _userManager.GetRolesAsync(user)
+        });
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+        {
+            return NotFound("User not found.");
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
 
         return Ok();
     }
-
 }
